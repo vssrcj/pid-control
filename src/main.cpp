@@ -48,15 +48,21 @@ int main()
         if (event == "telemetry") {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
-          double speed = std::stod(j[1]["speed"].get<std::string>());
-          double angle = std::stod(j[1]["steering_angle"].get<std::string>());
-          double steer_value;
+          // double speed = std::stod(j[1]["speed"].get<std::string>());
+          // double angle = std::stod(j[1]["steering_angle"].get<std::string>());
+          double steer_value = 0.0;
           /*
           * TODO: Calcuate steering value here, remember the steering value is
           * [-1, 1].
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+
+          // Update error values with cte
+          pid.UpdateError(cte);
+          
+          // Calculate steering value (if reasonable error, returns between [-1, 1])
+          steer_value -= pid.TotalError();
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
