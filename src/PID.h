@@ -16,7 +16,14 @@ public:
   double Kp_;
   double Ki_;
   double Kd_;
-
+  /*
+  * Twiddle
+  */
+  double dp[3];
+  double best_err_;
+  int twiddle_state_;
+  int i_;
+  int steps;
   /*
   * Constructor
   */

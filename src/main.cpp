@@ -33,6 +33,7 @@ int main()
   uWS::Hub h;
 
   PID pid;
+  pid.Init(0.0, 0.0, 0.0);
   // TODO: Initialize the pid variable.
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -48,8 +49,8 @@ int main()
         if (event == "telemetry") {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
-          // double speed = std::stod(j[1]["speed"].get<std::string>());
-          // double angle = std::stod(j[1]["steering_angle"].get<std::string>());
+          double speed = std::stod(j[1]["speed"].get<std::string>());
+          double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value = 0.0;
           /*
           * TODO: Calcuate steering value here, remember the steering value is
@@ -62,16 +63,27 @@ int main()
           pid.UpdateError(cte);
           
           // Calculate steering value (if reasonable error, returns between [-1, 1])
+          double error = pid.TotalError();
           steer_value -= pid.TotalError();
           
+          double throttle = 0.6;
+          if(fabs(error) > 0.2 && speed > 20) {
+            throttle = -1.0;
+          } else if (speed > 60) {
+            throttle = 0.0;
+          } else if (fabs(error) > 0.05) {
+            throttle = 0.5;
+          } else {
+            throttle = 0.7;
+          }
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          std::cout << "Throttle: " << angle << ", CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle; // 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
