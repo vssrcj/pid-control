@@ -8,58 +8,48 @@ using namespace std;
 * TODO: Complete the PID class.
 */
 
-enum Type { P, PI, _PID, TWIDDLE };
+enum Type { P, PI, _PID };
 
-static Type type = TWIDDLE;
+static Type type = P;
+static bool use_twiddle = false;
+
+static int param_count = type == P ? 1 : (type == PI ? 2 : 3);
 
 PID::PID() {}
 
 PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
-  Kp_ = Kp;
-  Ki_ = Ki;
-  Kd_ = Kd;
+  this->Kp = Kp;
+  this->Ki = Ki;
+  this->Kd = Kd;
 
-  p_error_ = 0.0;
-  i_error_ = 0.0;
-  d_error_ = 0.0;
+  p_error = 0.0;
+  i_error = 0.0;
+  d_error = 0.0;
 
-  // p_ = 0;
-  // dp_ = 1;
-  i_ = 0;
+  i = 0;
   steps = 0;
-  // std::cout << "SET: " << "i_: " << i_ << std::endl;
-  dp[0] = 0.2;
-  dp[1] = 3.0;
-  dp[2] = 0.004;
-  best_err_ = -1;
-  twiddle_state_ = 0;
-  // Previous cte.
-  // prev_cte = 0.0;
-
-  // // Counters.
-  // counter = 0;
-  // errorSum = 0.0;
-  // minError = std::numeric_limits<double>::max();
-  // maxError = std::numeric_limits<double>::min();
+  dp[0] = Kp;
+  dp[1] = Ki;
+  dp[2] = Kd;
+  p[0] = 0.0;
+  p[1] = 0.0;
+  p[2] = 0.0;
+  best_err = -1;
+  twiddle_repeat = false;
 }
 
 void PID::UpdateError(double cte) {
-  // if (steps < 20) {
-  d_error_ = cte - p_error_;
-  p_error_ = cte;
-  i_error_ += cte;
-  // }
-  // std::cout << "i_: " << i_ << ", Kp_: " << Kp_ << ", Kd_: " << Kd_ << ", Ki_: " << Ki_ << std::endl;
-  std::cout << "d0: " << dp[0] << ", d1: " << dp[1] << ", d2: " << dp[2] << std::endl;
-  std::cout << "d_error_: " << d_error_ << ", p_error_: " << p_error_ << ", i_error_: " << i_error_ << std::endl;
-  // d_error_ = dp[0];
-  // p_error_ = dp[1];
-  // i_error_ = dp[2];
+  steps += 1;
 
-  if (best_err_ < 0) {
-    best_err_ = cte;
+  d_error = cte - p_error;
+  p_error = cte;
+  i_error += cte;
+
+  if (best_err < 0) {
+    // If first run.
+    best_err = cte;
     return;
   }
 
@@ -68,70 +58,46 @@ void PID::UpdateError(double cte) {
   if (sum < 0.2) {
     return;
   }
-  steps += 1;
-  double p[] = { Kp_, Kd_, Ki_ };
-  i_ = i_ > 2 ? 0 : i_;
-  if (twiddle_state_ == 0) {
-    p[i_] += dp[i_];
-    // std::cout << p[i_] << std::endl;
+
+  i %= param_count;
+
+  if (!twiddle_repeat) {
+    p[i] += dp[i];
   }
  
-  if (cte < best_err_) {
-    best_err_ = cte;
-    dp[i_] *= 1.1;
-    i_ += 1;
-    twiddle_state_ = 0;
-    // std::cout << "1: " << dp[i_] << std::endl;
+  if (cte < best_err) {
+    best_err = cte;
+    dp[i] *= 1.1;
+    i += 1;
+    twiddle_repeat = false;
   } else {
-    if (twiddle_state_ == 0) {
-      p[i_] -= 2 * dp[i_];
-      // std::cout << "1: " << p[i_] << std::endl;
-      twiddle_state_ = 1;
+    if (!twiddle_repeat) {
+      p[i] -= 2 * dp[i];
+      twiddle_repeat = true;
     } else {
-      p[i_] += dp[i_];
-      dp[i_] *= 0.9;
-      // std::cout << "3: " << p[i_] << std::endl;
-      // std::cout << "4: " << dp[i_] << std::endl;
-      twiddle_state_ = 0;
-      i_ += 1;
+      p[i] += dp[i];
+      dp[i] *= 0.9;
+      twiddle_repeat = false;
+      i += 1;
     }
   }
-  Kp_ = p[0];
-  Kd_ = p[1];
-  Ki_ = p[2];
-  // if (steps >= 20) {
-  // d_error_ = dp[0];
-  // p_error_ = dp[1];
-  // i_error_ = dp[2];
-  // }
-  std::cout << "i_: " << i_ << ", Kp_: " << Kp_ << ", Kd_: " << Kd_ << ", Ki_: " << Ki_ << std::endl << std::endl;
-  // std::cout << "i_: " << i_ << ", Kp_: " << Kp_ << ", Kd_: " << Kd_ << ", Ki_: " << Ki_ << std::endl << std::endl;
-  // p_error_ = cte;
-  // i_error_ += cte;
-  // d_error_ = cte - p_error_;
+  Kp = p[0];
+  Kd = p[1];
+  Ki = p[2];
 }
 
 double PID::TotalError() {
+  double result;
   if (type == P) {
-    return 0.05 * p_error_;
+    result = Kp * p_error;
+  } else if (type == PI) {
+    result = (Kp * p_error) + (Kd * d_error);
+  } else {
+    result = (Kp * p_error) + (Kd * d_error) + (Ki * i_error);
   }
-  if (type == PI) {
-    return (0.2 * p_error_) + (3.0 * d_error_);
+  if (use_twiddle) {
+    result *= 0.01;
   }
-  if (type == _PID) {
-    return (0.2 * p_error_) + (3.0 * d_error_) + (0.004 * i_error_);
-  }
-  if (type == TWIDDLE) {
-    // double norm = 1 / (Kp_ + Kd_ + Ki_);
-    double result = 0.01 * ((Kp_ * p_error_) + (Kd_ * d_error_) + (Ki_ * i_error_));
-    if (result < -1) return -1.0;
-    if (result > 1) return 1.0;
-    return result;
-    // return (Kp_ * p_error_) +
-    // (Kd_ * d_error_) +
-    // (Ki_ * i_error_);
-  }
-  return 0.0;
-  // return (Kp_ * p_error_) + (Kd_ * d_error_) + (Ki_ * i_error_);
+  return result > 1 ? 1 : (result < -1 ? 1 : result);
 }
 

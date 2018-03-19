@@ -6,23 +6,24 @@ public:
   /*
   * Errors
   */
-  double p_error_;
-  double i_error_;
-  double d_error_;
+  double p_error;
+  double i_error;
+  double d_error;
 
   /*
   * Coefficients
   */ 
-  double Kp_;
-  double Ki_;
-  double Kd_;
+  double Kp;
+  double Ki;
+  double Kd;
   /*
   * Twiddle
   */
   double dp[3];
-  double best_err_;
-  int twiddle_state_;
-  int i_;
+  double p[3];
+  double best_err;
+  bool twiddle_repeat;
+  int i;
   int steps;
   /*
   * Constructor
