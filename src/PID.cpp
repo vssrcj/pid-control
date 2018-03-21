@@ -46,6 +46,7 @@ void PID::Init(double Kp, double Kd, double Ki) {
 
 void PID::ActivateTwiddle() {
   use_twiddle = true;
+  // Begin all coefficients at 0.
   Kp = 0;
   Ki = 0;
   Kd = 0;
@@ -69,6 +70,7 @@ void PID::UpdateError(double cte) {
   double sum = dp[0] + dp[1] + dp[2];
 
   if (sum < 0.2) {
+    // Done optimizing.
     return;
   }
 
@@ -103,7 +105,6 @@ void PID::UpdateError(double cte) {
 
 double PID::TotalError() {
   double result;
-  std::cout << "Kp: " << Kp << ", Kd: " << Kd << ", Ki: " << Ki << std::endl;
   if (param_count == 1) {
     result = (Kp * p_error);
   } else if (param_count == 2) {
@@ -112,6 +113,7 @@ double PID::TotalError() {
     result = (Kp * p_error) + (Kd * d_error) + (Ki * i_error);
   }
   if (use_twiddle) {
+    // Smoothing element.
     result *= 0.02;
   }
   return result > 1 ? 1 : (result < -1 ? 1 : result);
