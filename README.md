@@ -30,7 +30,7 @@ Only the P parameter is set in this video:
 </a>
 
 It is the most important parameter - it steers in the direction and in proportion to the distance from the center of the lane.
-It does overshoot a lot though, and approaches the center smoothly.
+It does overshoot a lot though, and does not approach the center smoothly.
 
 ## PD (proportional & differential)
 
@@ -42,7 +42,7 @@ The P and D parameters are set in this video:
  />
 </a>
 
-The differential parameter is used no mitigate the overshooting.  This results in a much smoother approach to the center.
+The differential parameter is used to mitigate the overshooting.  This results in a much smoother approach to the center.
 
 ## PID (proportional & differential & integral)
 
@@ -65,9 +65,9 @@ The result obtained are:
 * Kd: 128
 * Ki: 0.18
 
-If you use these parameters, the car approaches the line rapidly.  It does it too well, and results in a jarring experience.
+If you use these parameters, the car approaches the line rapidly.  It does this too well actuallt, and results in a jarring experience.
 
-If you smooth these results (make them proportionally smalle), you get:
+If you smooth these results (make them proportionally smaller), you get:
 * Kp: 0.052
 * Kd: 2.56
 * Ki: 0.0035
