@@ -1,34 +1,14 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# Car PID Controls
 
----
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-## Dependencies
+*made by [CJ](https://github.com/vssrcj)*
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+# Overview.
 
-There's an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3)
+This project uses C++ to create a Proportional-Integral-Derivative Controller (PID) in order to drive a simulated car around a virtual track.
 
-## Basic Build Instructions
+##= Basic Build Instructions
 
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
@@ -37,62 +17,67 @@ There's an experimental patch for windows in this [PR](https://github.com/udacit
 
 Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
 
-## Editor Settings
+# Results.
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+## P (proportional).
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+Only the P parameter is set in this video:
 
-## Code Style
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=8wJTvivkoyY" target="_blank">
+ <img src="http://img.youtube.com/vi/8wJTvivkoyY/0.jpg" 
+  alt="IMAGE ALT TEXT HERE" height="300"
+ />
+</a>
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+It is the most important parameter - it steers in the direction and in proportion to the distance from the center of the lane.
+It does overshoot a lot though, and approaches the center smoothly.
 
-## Project Instructions and Rubric
+## PD (proportional & differential)
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+The P and D parameters are set in this video:
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=Lc1gx-2a1qg" target="_blank">
+ <img src="http://img.youtube.com/vi/Lc1gx-2a1qg/0.jpg" 
+  alt="IMAGE ALT TEXT HERE" height="300"
+ />
+</a>
 
-## Hints!
+The differential parameter is used no mitigate the overshooting.  This results in a much smoother approach to the center.
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
+## PID (proportional & differential & integral)
 
-## Call for IDE Profiles Pull Requests
+The P, I, and D parameters are set in this video:
 
-Help your fellow students!
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=JFefsbsfGYY" target="_blank">
+ <img src="http://img.youtube.com/vi/JFefsbsfGYY/0.jpg" 
+  alt="IMAGE ALT TEXT HERE" height="300"
+ />
+</a>
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
+The integral parameter acts to counteract the bias.  It seems to help the car better steer around corners.
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+# Twiddle
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
+Twiddle is a way to optimize all coefficients/parameters.
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
+The result obtained are:
+* Kp: 2.6
+* Kd: 128
+* Ki: 0.18
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
+If you use these parameters, the car approaches the line rapidly.  It does it too well, and results in a jarring experience.
 
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+If you smooth these results (make them proportionally smalle), you get:
+* Kp: 0.052
+* Kd: 2.56
+* Ki: 0.0035
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Which provides the best experience:
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=13qPcwBriBw" target="_blank">
+ <img src="http://img.youtube.com/vi/13qPcwBriBw/0.jpg" 
+  alt="IMAGE ALT TEXT HERE" height="300"
+ />
+</a>
+
+This car moves around the track with a (0.5) throttle without any problems.
