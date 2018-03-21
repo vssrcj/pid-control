@@ -7,22 +7,28 @@ using namespace std;
 /*
 * TODO: Complete the PID class.
 */
-
-enum Type { P, PI, _PID };
-
-static Type type = P;
-static bool use_twiddle = false;
-
-static int param_count = type == P ? 1 : (type == PI ? 2 : 3);
-
 PID::PID() {}
 
 PID::~PID() {}
 
-void PID::Init(double Kp, double Ki, double Kd) {
+void PID::Init(double Kp) {
+  PID::Init(Kp, -1, -1);
+  
+  param_count = 1;
+}
+
+void PID::Init(double Kp, double Kd) {
+  PID::Init(Kp, Kd, -1);
+  
+  param_count = 2;
+}
+
+void PID::Init(double Kp, double Kd, double Ki) {
+  param_count = 3;
+  
   this->Kp = Kp;
-  this->Ki = Ki;
   this->Kd = Kd;
+  this->Ki = Ki;
 
   p_error = 0.0;
   i_error = 0.0;
@@ -31,13 +37,18 @@ void PID::Init(double Kp, double Ki, double Kd) {
   i = 0;
   steps = 0;
   dp[0] = Kp;
-  dp[1] = Ki;
-  dp[2] = Kd;
-  p[0] = 0.0;
-  p[1] = 0.0;
-  p[2] = 0.0;
+  dp[1] = Kd;
+  dp[2] = Ki;
   best_err = -1;
   twiddle_repeat = false;
+  use_twiddle = false;
+}
+
+void PID::ActivateTwiddle() {
+  use_twiddle = true;
+  Kp = 0;
+  Ki = 0;
+  Kd = 0;
 }
 
 void PID::UpdateError(double cte) {
@@ -47,6 +58,8 @@ void PID::UpdateError(double cte) {
   p_error = cte;
   i_error += cte;
 
+  if (!use_twiddle) return;
+ 
   if (best_err < 0) {
     // If first run.
     best_err = cte;
@@ -60,6 +73,8 @@ void PID::UpdateError(double cte) {
   }
 
   i %= param_count;
+
+  double p[] = { Kp, Kd, Ki };
 
   if (!twiddle_repeat) {
     p[i] += dp[i];
@@ -88,16 +103,16 @@ void PID::UpdateError(double cte) {
 
 double PID::TotalError() {
   double result;
-  if (type == P) {
-    result = Kp * p_error;
-  } else if (type == PI) {
+  std::cout << "Kp: " << Kp << ", Kd: " << Kd << ", Ki: " << Ki << std::endl;
+  if (param_count == 1) {
+    result = (Kp * p_error);
+  } else if (param_count == 2) {
     result = (Kp * p_error) + (Kd * d_error);
   } else {
     result = (Kp * p_error) + (Kd * d_error) + (Ki * i_error);
   }
   if (use_twiddle) {
-    result *= 0.01;
+    result *= 0.02;
   }
   return result > 1 ? 1 : (result < -1 ? 1 : result);
 }
-
