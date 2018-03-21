@@ -8,7 +8,7 @@
 
 This project uses C++ to create a Proportional-Integral-Derivative Controller (PID) in order to drive a simulated car around a virtual track.
 
-##= Basic Build Instructions
+## Basic Build Instructions
 
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
