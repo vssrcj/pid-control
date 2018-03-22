@@ -61,14 +61,14 @@ The integral parameter acts to counteract the bias.  It seems to help the car be
 Twiddle is a way to optimize all coefficients/parameters.
 
 The result obtained are:
-* Kp: 2.6
+* Kp: 7.6
 * Kd: 128
 * Ki: 0.18
 
-If you use these parameters, the car approaches the line rapidly.  It does this too well actuallt, and results in a jarring experience.
+If you use these parameters, the car approaches the line rapidly.  It does this too well actually, and results in a jarring experience.
 
 If you smooth these results (make them proportionally smaller), you get:
-* Kp: 0.052
+* Kp: 0.152
 * Kd: 2.56
 * Ki: 0.0035
 
@@ -80,4 +80,4 @@ Which provides the best experience:
  />
 </a>
 
-This car moves around the track with a (0.5) throttle without any problems.
+This car moves around the track with a (0.4) throttle without any problems.
